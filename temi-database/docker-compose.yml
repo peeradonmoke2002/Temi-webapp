@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: temidb
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+    restart: unless-stopped
+
+
+networks:
+  mynetwork:
+    driver: bridge
