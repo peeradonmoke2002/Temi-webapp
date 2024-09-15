@@ -86,42 +86,59 @@ const Store = () => {
   }, []);
 
   const handleSaveEdit = (editedProduct) => {
+    const { detail, name, price, product_image, qr_code_image } = editedProduct;
+
+    if (!detail || !name || !price || !product_image || !qr_code_image) {
+        console.warn('One or more required fields are empty. Nothing to add.');
+        setShowEditModal(false);
+        return;
+    }
+
     const updatedData = localData.map(product =>
       product.id === editedProduct.id ? editedProduct : product
     );
     setLocalData(updatedData);
     dispatch(updateProduct(editedProduct));
   
-    // // Directly use the new command in the axios post
-    // const newCommand = 'UPDATE';
-    // axios.post('http://localhost:3002/update-store', { command: newCommand })
-    //   .then(response => console.log('Command sent:', response.data))
-    //   .catch(error => console.error('Error sending command:', error));
+    let newCommand = 'UPDATE';
+    axios.post('http://localhost:3002/update-store', { command: newCommand })
+      .then(response => console.log('Command sent:', response.data))
+      .catch(error => console.error('Error sending command:', error));
   
     setShowEditModal(false);
   };
 
-  const handleSaveAdd = useCallback((newProduct) => {
+const handleSaveAdd = useCallback((newProduct) => {
+    const { detail, name, price, product_image, qr_code_image } = newProduct;
+
+    if (!detail || !name || !price || !product_image || !qr_code_image) {
+        console.warn('One or more required fields are empty. Nothing to add.');
+        setShowAddModal(false);
+        return;
+    }
+
+    console.log('New Product:', newProduct);
+
     dispatch(addProduct(newProduct))
-      .unwrap()
-      .then((addedProduct) => {
-        setLocalData((prevData) => [
-          ...prevData,
-          addedProduct 
-        ]);
-      })
-      .catch((error) => {
-        console.error("Failed to add product:", error);
-      });
-  
-    // // Directly use the new command in the axios post
-    // const newCommand = 'UPDATE';
-    // axios.post('http://localhost:3002/update-store', { command: newCommand })
-    //   .then(response => console.log('Command sent:', response.data))
-    //   .catch(error => console.error('Error sending command:', error));
-  
+        .unwrap()
+        .then((addedProduct) => {
+            setLocalData((prevData) => {
+                // Ensure no duplicates by filtering out any existing product with the same ID
+                const filteredData = prevData.filter(product => product.id !== addedProduct.id);
+                return [...filteredData, addedProduct];
+            });
+        })
+        .catch((error) => {
+            console.error("Failed to add product:", error);
+        });
+
+    let newCommand = 'UPDATE';
+    axios.post('http://localhost:3002/update-store', { command: newCommand })
+        .then(response => console.log('Command sent:', response.data))
+        .catch(error => console.error('Error sending command:', error));
+
     setShowAddModal(false);
-  }, [dispatch]);
+}, [dispatch]);
 
   const closePreview = useCallback(() => {
     setPreview({ image: null, type: null, show: false });

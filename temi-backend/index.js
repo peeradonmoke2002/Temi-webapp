@@ -59,9 +59,16 @@ const connectToRabbitMQ = () => {
                 return;
             }
             channel = ch;
-            const queue = 'temi_control_queue';
-            console.log(`Connected to RabbitMQ and created channel for queue: ${queue}`);
-            channel.assertQueue(queue, {
+            const controlQueuequeue = 'temi_control_queue';
+            const storeupdateQueue = 'store_update_queue';
+            console.log(`Connected to RabbitMQ and created channel for queue: ${controlQueuequeue} and ${storeupdateQueue}`);
+            channel.assertQueue(controlQueuequeue, {
+                durable: false,
+                arguments: {
+                    'x-message-ttl': 300000  // TTL set to 300,000 ms (5 minutes)
+                }
+            });
+            channel.assertQueue(storeupdateQueue, {
                 durable: false,
                 arguments: {
                     'x-message-ttl': 300000  // TTL set to 300,000 ms (5 minutes)
@@ -114,6 +121,20 @@ app.post('/send-command', (req, res) => {
         console.log(`Sent command: ${command}`);
         res.status(200).send('Command sent to RabbitMQ');
     } else {
+        res.status(500).send('Channel is not available');
+    }
+});
+
+app.post('/update-store', (req, res) => {
+    const command = req.body.command;
+    const queue = 'store_update_queue';
+
+    if (channel) {
+        channel.sendToQueue(queue, Buffer.from(command));
+        console.log
+        res.status(200).send('Command sent to RabbitMQ');
+    }
+    else {
         res.status(500).send('Channel is not available');
     }
 });

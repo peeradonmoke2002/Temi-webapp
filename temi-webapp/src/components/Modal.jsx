@@ -1,13 +1,25 @@
-import React from "react";
-
-
+import React, { useEffect, useState } from "react";
 
 const TailwindModal = ({ show, onClose, imageSrc, title = "Image Preview" }) => {
-  if (!show) return null;
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setIsVisible(true);
+    } else {
+      setTimeout(() => setIsVisible(false), 300); // Delay for animation to finish
+    }
+  }, [show]);
+
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="relative p-4 w-full max-w-2xl max-h-full">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${show ? 'bg-black bg-opacity-50' : 'opacity-0'}`}>
+      <div
+        className={`relative p-4 w-full max-w-2xl max-h-full transform transition-transform duration-300 ${
+          show ? "scale-100 opacity-100" : "scale-75 opacity-0"
+        }`}
+      >
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
           {/* Modal header */}
           <div className="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
@@ -15,7 +27,7 @@ const TailwindModal = ({ show, onClose, imageSrc, title = "Image Preview" }) => 
               {title}
             </h3>
             <button
-              onClick={onClose}  // Calls the onClose (which is closePreview) when clicked
+              onClick={onClose}
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
             >
               <svg
@@ -55,7 +67,7 @@ const TailwindModal = ({ show, onClose, imageSrc, title = "Image Preview" }) => 
           {/* Modal footer */}
           <div className="flex items-center p-4 border-t border-gray-200 rounded-b dark:border-gray-600">
             <button
-              onClick={onClose}  // Calls the closePreview function on button click
+              onClick={onClose}
               className="bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
               Close

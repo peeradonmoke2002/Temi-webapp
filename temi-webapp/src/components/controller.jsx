@@ -5,7 +5,7 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 const Controller = () => {
-  const [controlEnabled, setControlEnabled] = useState(true);
+  const [controlEnabled, setControlEnabled] = useState(false);
 
   const handleKeyDown = (event) => {
     if (!controlEnabled) return;
