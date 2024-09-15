@@ -5,7 +5,6 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 const Controller = () => {
-  const [command, setCommand] = useState('');
   const [controlEnabled, setControlEnabled] = useState(true);
 
   const handleKeyDown = (event) => {
@@ -34,7 +33,7 @@ const Controller = () => {
         return;
     }
 
-    setCommand(newCommand);
+    // Send the newCommand directly, not relying on state
     axios.post('http://localhost:3002/send-command', { command: newCommand })
       .then(response => console.log('Command sent:', response.data))
       .catch(error => console.error('Error sending command:', error));
@@ -45,12 +44,12 @@ const Controller = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [controlEnabled]);
+  }, [controlEnabled]); // Add controlEnabled to dependencies
 
   return (
     <div className="flex flex-col items-center justify-center p-4 bg-gray-100 mt-4">
       <div>
-        <h1 className="flex justify-center items-center text-4xl">TMEI APP</h1>
+        <h1 className="flex justify-center items-center text-4xl">TEMI APP</h1>
         <p className="flex justify-center items-center text-1xl">
           temi-webapp is a web application that allows you to control a temi robot.
         </p>
@@ -76,19 +75,7 @@ const Controller = () => {
           </div>
         </div>
     </div>
-      
   );
 };
 
 export default Controller;
-
-{/* <div className="flex justify-center items-center">
-<div>
-    <h1 className="flex justify-center items-center text-4xl">Temi-webapp</h1>
-    <p className="flex justify-center items-center text-1xl">
-      temi-webapp is a web application that allows you to control a temi robot.
-    </p>
-    <Controller />
-    <ControllerRes />
-</div>
-</div> */}

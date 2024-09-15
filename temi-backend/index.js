@@ -4,6 +4,14 @@ const cors = require('cors');
 const WebSocket = require('ws');
 const app = express();
 const { Pool } = require('pg');
+const bodyParser = require('body-parser');
+
+
+// Increase the body size limit
+app.use(bodyParser.json({ limit: '50mb' })); // Adjust the limit as needed
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); // Adjust the limit for URL-encoded data
+
+app.use(cors());
 
 // RabbitMQ connection //
 const port = 3002;
@@ -66,27 +74,36 @@ const connectToRabbitMQ = () => {
 connectToRabbitMQ();
 
 
-// WebSocket server for WebRTC signaling
-const wss = new WebSocket.Server({ port: 8080 });  // WebSocket signaling server
+// const wss = new WebSocket.Server({ port: 8080 });  // WebSocket signaling server
 
-wss.on('connection', (ws) => {
-    console.log('A client connected to the WebSocket signaling server');
+// // WebSocket signaling server logic
+// wss.on('connection', (ws) => {
+//     console.log('A client connected to the WebSocket signaling server');
 
-    ws.on('message', (message) => {
-        console.log('Received message:', message);
+//     ws.on('message', (message) => {
+//         console.log('Received message:', message);
 
-        // Broadcast the message to all clients except the sender (if needed)
-        wss.clients.forEach((client) => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
-    });
+//         // Broadcast the message to all clients except the sender
+//         wss.clients.forEach((client) => {
+//             if (client !== ws && client.readyState === WebSocket.OPEN) {
+//                 client.send(message);
+//             }
+//         });
+//     });
 
-    ws.on('close', () => {
-        console.log('A client disconnected');
-    });
-});
+//     ws.on('close', () => {
+//         // console.log('WebSocket closed. Attempting to reconnect...');
+//         // setTimeout(() => {
+//         //     // Recreate the WebSocket connection here
+//         //     const ws = new WebSocket.Server({ port: 8080 });
+//         // }, 1000); // Reconnect after 1 second
+//     });
+
+//     ws.on('error', (error) => {
+//         console.error('WebSocket error:', error);
+//     });
+// });
+
 
 app.post('/send-command', (req, res) => {
     const command = req.body.command;
@@ -139,24 +156,6 @@ app.get('/api/products/data', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch products' });
-    }
-});
-
-app.delete('/api/products/data/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const client = await pool.connect();
-        const result = await client.query('DELETE FROM store WHERE id = $1', [id]);
-        client.release();
-        
-        if (result.rowCount === 0) {
-            res.status(404).json({ error: 'Row not found' });
-        } else {
-            res.json({ message: 'Row deleted successfully' });
-        }
-    } catch (err) {
-        console.error('Error deleting data from PostgreSQL', err);
-        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -218,6 +217,153 @@ app.get('/api/qrCodeImage/:id', async (req, res) => {
         res.send(imageData);
     } catch (err) {
         console.error('Error fetching image from PostgreSQL', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Add new product
+app.post('/api/products/add', async (req, res) => {
+    const { name, price, product_image, qr_code_image, detail } = req.body;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(
+            'INSERT INTO store (name, price, product_image, qr_code_image, detail) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [name, price, product_image ? Buffer.from(product_image, 'base64') : null, qr_code_image ? Buffer.from(qr_code_image, 'base64') : null, detail]
+        );
+        client.release();
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error adding product to PostgreSQL', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Endpoint to update product
+// Endpoint to update product text and float data
+app.put('/api/products/updateData/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, price, detail } = req.body;
+
+    try {
+        const client = await pool.connect();
+
+        // Retrieve the current product data to retain unchanged fields
+        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [id]);
+
+        if (currentProductResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const currentProduct = currentProductResult.rows[0];
+
+        // Conditionally update fields based on what is provided in the request body
+        const updatedName = name !== undefined ? name : currentProduct.name;
+        const updatedPrice = price !== undefined ? price : currentProduct.price;
+        const updatedDetail = detail !== undefined ? detail : currentProduct.detail;
+
+        // Update the text and float fields in the database
+        const result = await client.query(
+            'UPDATE store SET name = $1, price = $2, detail = $3, updated_at = NOW() WHERE id = $4 RETURNING *',
+            [updatedName, updatedPrice, updatedDetail, id]
+        );
+
+        client.release();
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating product text and float data in PostgreSQL', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Endpoint to update only the product image
+app.put('/api/products/updateProductImage/:id', async (req, res) => {
+    const { id } = req.params;
+    const { product_image } = req.body;
+
+    try {
+        const client = await pool.connect();
+
+        // Retrieve the current product data to retain unchanged fields
+        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [id]);
+
+        if (currentProductResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const currentProduct = currentProductResult.rows[0];
+
+        // Update the product_image if provided, otherwise retain the existing image
+        const updatedProductImage = product_image ? Buffer.from(product_image, 'base64') : currentProduct.product_image;
+
+        // Update only the product image in the database
+        const result = await client.query(
+            'UPDATE store SET product_image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [updatedProductImage, id]
+        );
+
+        client.release();
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating product image in PostgreSQL', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+// Endpoint to update only the QR code image
+app.put('/api/products/updateQrCodeImage/:id', async (req, res) => {
+    const { id } = req.params;
+    const { qr_code_image } = req.body;
+
+    try {
+        const client = await pool.connect();
+
+        // Retrieve the current product data to retain unchanged fields
+        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [id]);
+
+        if (currentProductResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const currentProduct = currentProductResult.rows[0];
+
+        // Update the qr_code_image if provided, otherwise retain the existing image
+        const updatedQRCodeImage = qr_code_image ? Buffer.from(qr_code_image, 'base64') : currentProduct.qr_code_image;
+
+        // Update only the QR code image in the database
+        const result = await client.query(
+            'UPDATE store SET qr_code_image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [updatedQRCodeImage, id]
+        );
+
+        client.release();
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating QR code image in PostgreSQL', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+
+// Delete product by ID
+app.delete('/api/products/delete/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query('DELETE FROM store WHERE id = $1 RETURNING id', [id]);
+        client.release();
+
+        if (result.rowCount === 0) {
+            res.status(404).json({ error: 'Product not found' });
+        } else {
+            res.json({ message: 'Product deleted successfully', id: result.rows[0].id });
+        }
+    } catch (err) {
+        console.error('Error deleting product from PostgreSQL', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
