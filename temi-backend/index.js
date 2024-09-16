@@ -59,7 +59,7 @@ const connectToRabbitMQ = () => {
                 return;
             }
             channel = ch;
-            const controlQueuequeue = 'temi_control_queue';
+            const controlQueuequeue = 'robot_control_queue';
             const storeupdateQueue = 'store_update_queue';
             console.log(`Connected to RabbitMQ and created channel for queue: ${controlQueuequeue} and ${storeupdateQueue}`);
             channel.assertQueue(controlQueuequeue, {
@@ -114,7 +114,7 @@ connectToRabbitMQ();
 
 app.post('/send-command', (req, res) => {
     const command = req.body.command;
-    const queue = 'temi_control_queue';
+    const queue = 'robot_control_queue';
 
     if (channel) {
         channel.sendToQueue(queue, Buffer.from(command));
