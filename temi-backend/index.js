@@ -7,6 +7,7 @@ const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 
 
+
 // Increase the body size limit
 app.use(bodyParser.json({ limit: '50mb' })); // Adjust the limit as needed
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); // Adjust the limit for URL-encoded data
@@ -83,7 +84,7 @@ connectToRabbitMQ();
 
 // const wss = new WebSocket.Server({ port: 8080 });  // WebSocket signaling server
 
-// // WebSocket signaling server logic
+// // // WebSocket signaling server logic
 // wss.on('connection', (ws) => {
 //     console.log('A client connected to the WebSocket signaling server');
 
@@ -99,11 +100,7 @@ connectToRabbitMQ();
 //     });
 
 //     ws.on('close', () => {
-//         // console.log('WebSocket closed. Attempting to reconnect...');
-//         // setTimeout(() => {
-//         //     // Recreate the WebSocket connection here
-//         //     const ws = new WebSocket.Server({ port: 8080 });
-//         // }, 1000); // Reconnect after 1 second
+//         console.log('A client disconnected from the WebSocket signaling server');
 //     });
 
 //     ws.on('error', (error) => {
