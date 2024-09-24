@@ -9,14 +9,14 @@ import { useNavigate } from "react-router-dom";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
-import imagelogo from "../assets/image.png"
+import image from '../assets/image.png';
 
 const SideBar = () => {
   const [isCollapsed, setisCollapsed] = useState(false);
   const [toggled, setToggled] = useState(false);
   const [broken, setBroken] = useState(false);
   
-  const navigate = useNavigate();  // <-- Initialize useNavigate
+  const navigate = useNavigate();  // Initialize useNavigate
 
   return (
     <div
@@ -53,7 +53,7 @@ const SideBar = () => {
                     alignItems="center"
                     ml="20px"
                   >
-                    <img src={imagelogo} alt="Logo" className="h-8 w-8 mr-2" /> {/* Use the imported logo */}
+                    <img src={image} alt="Logo" className="h-8 w-8 mr-2" /> {/* Use the imported logo */}
                     <Typography>TEMI APP</Typography>
                     <IconButton onClick={() => setisCollapsed(!isCollapsed)}>
                       <MenuOutlinedIcon />
@@ -72,7 +72,6 @@ const SideBar = () => {
               </MenuItem>
 
             </Menu>
-
           </div>
         </div>
       </Sidebar>
