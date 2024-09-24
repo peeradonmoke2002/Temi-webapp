@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const Video = ({ websocketUrl }) => {
+const Video = () => {
+  const websocketUrl = "ws://10.7.142.208:8765";
   const [connected, setConnected] = useState(false);
-  const videoRef = useRef(null); // Reference to update the video element with new frames
+  const canvasRef = useRef(null); // Reference to update the canvas element with new frames
 
   useEffect(() => {
     // Create a WebSocket connection
@@ -16,11 +17,18 @@ const Video = ({ websocketUrl }) => {
     ws.onmessage = (event) => {
       // This assumes the message is a base64-encoded JPEG image
       const imgSrc = `data:image/jpeg;base64,${event.data}`;
-      
-      // Update the video element with the new image
-      if (videoRef.current) {
-        videoRef.current.src = imgSrc;
-      }
+
+      // Create a new Image object
+      const img = new Image();
+      img.src = imgSrc;
+
+      // Draw the image on the canvas when it loads
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height); // Clear the previous frame
+        context.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw the new frame
+      };
     };
 
     ws.onclose = () => {
@@ -36,18 +44,19 @@ const Video = ({ websocketUrl }) => {
     return () => {
       ws.close();
     };
-  }, [websocketUrl]); 
+  }, [websocketUrl]);
 
-return (
+  return (
     <div className="video-stream">
-        <canvas
-            ref={videoRef}
-            width="640"
-            height="480"
-            style={{ border: 'none' }}
-        />
+      <canvas
+        ref={canvasRef}
+        width="640"
+        height="480"
+        style={{ border: 'none' }}
+      />
+      <div>{connected ? 'Connected' : 'Disconnected'}</div>
     </div>
-);
+  );
 };
 
 export default Video;

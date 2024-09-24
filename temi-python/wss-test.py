@@ -7,7 +7,7 @@ import base64
 # WebSocket client to receive the stream
 async def receive_image():
     # Connect to the WebSocket server
-    uri = "ws://10.61.2.1:8765"
+    uri = "ws://10.7.145.70:8765"
     
     async with websockets.connect(uri) as websocket:
         print("Connected to WebSocket server")

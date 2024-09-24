@@ -11,20 +11,19 @@ const Controller = () => {
     if (!controlEnabled) return;
 
     let newCommand;
-    const isNonSmart = event.ctrlKey 
-    
+
     switch (event.key.toLowerCase()) {
       case 'w':
-        newCommand = isNonSmart ? 'MOVE_FORWARD_NON_SMART' : 'MOVE_FORWARD_SMART';
+        newCommand = 'MOVE_FORWARD';
         break;
       case 's':
-        newCommand = isNonSmart ? 'MOVE_BACKWARD_NON_SMART' : 'MOVE_BACKWARD_SMART';
+        newCommand = 'MOVE_BACKWARD';
         break;
       case 'a':
-        newCommand = isNonSmart ? 'MOVE_LEFT_NON_SMART' : 'MOVE_LEFT_SMART';
+        newCommand = 'MOVE_LEFT';
         break;
       case 'd':
-        newCommand = isNonSmart ? 'MOVE_RIGHT_NON_SMART' : 'MOVE_RIGHT_SMART';
+        newCommand = 'MOVE_RIGHT';
         break;
       case 'x':
       case 'z':

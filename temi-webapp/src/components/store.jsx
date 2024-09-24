@@ -88,11 +88,11 @@ const Store = () => {
   const handleSaveEdit = (editedProduct) => {
     const { detail, name, price, product_image, qr_code_image } = editedProduct;
 
-    if (!detail || !name || !price || !product_image || !qr_code_image) {
-        console.warn('One or more required fields are empty. Nothing to add.');
-        setShowEditModal(false);
-        return;
-    }
+    // if (!detail || !name || !price || !product_image || !qr_code_image) {
+    //     console.warn('One or more required fields are empty. Nothing to add.');
+    //     setShowEditModal(false);
+    //     return;
+    // }
 
     const updatedData = localData.map(product =>
       product.id === editedProduct.id ? editedProduct : product
@@ -111,11 +111,11 @@ const Store = () => {
 const handleSaveAdd = useCallback((newProduct) => {
     const { detail, name, price, product_image, qr_code_image } = newProduct;
 
-    if (!detail || !name || !price || !product_image || !qr_code_image) {
-        console.warn('One or more required fields are empty. Nothing to add.');
-        setShowAddModal(false);
-        return;
-    }
+    // if (!detail || !name || !price || !product_image || !qr_code_image) {
+    //     console.warn('One or more required fields are empty. Nothing to add.');
+    //     setShowAddModal(false);
+    //     return;
+    // }
 
     console.log('New Product:', newProduct);
 

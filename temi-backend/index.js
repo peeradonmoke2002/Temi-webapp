@@ -16,15 +16,15 @@ app.use(cors());
 
 // RabbitMQ connection //
 const port = 3002;
-const RABBITMQ_URL = 'amqp://admin:123456@localhost:5672'; 
+const RABBITMQ_URL = 'amqp://admin:123456@10.62.31.12:5672'; 
 
 // PostgreSQL database connection details
 const pool = new Pool({
-    user: 'peeradon',
-    host: 'localhost',  
-    database: 'temi_store_db',
-    password: '1234',
-    port: 5432,  // Default PostgreSQL port
+    user: 'admin',
+    host: '10.62.31.12',  
+    database: 'temi-db',
+    password: '123456',
+    port: 5432,  
 });
 
 // Function to convert BYTEA to base64
@@ -128,7 +128,7 @@ app.post('/update-store', (req, res) => {
 
     if (channel) {
         channel.sendToQueue(queue, Buffer.from(command));
-        console.log
+        console.log(`Sent command: ${command}`);
         res.status(200).send('Command sent to RabbitMQ');
     }
     else {

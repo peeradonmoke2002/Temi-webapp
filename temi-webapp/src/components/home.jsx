@@ -1,5 +1,4 @@
 import React from "react";
-import WebRTC from "./webRTC";
 import Controller from "./controller"
 import Video from './vdo';
 
@@ -14,8 +13,7 @@ function HomePage() {
                 </div>
             </div>
             <Controller />
-            <Video websocketUrl="ws://10.7.145.236:8765" />
-            {/* <WebRTC /> */}
+            <Video />
         </>
     );
     }
