@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import wasd from '../assets/wasd.png';
+
+import config from "../config/configureAPI";
+const currentUrl = window.location.href;
+const isDeploy = currentUrl.includes('localhost') ? 'development' : 'production';  
+const environment = process.env.NODE_ENV || isDeploy;
+const API = config[environment].API;
 
 const ControllerRes = () => {
   const [message, setMessage] = useState('');
@@ -8,7 +13,7 @@ const ControllerRes = () => {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/get-message');
+        const response = await axios.get(`${API}/get-message`);
         setMessage(response.data);
       } catch (error) {
         console.error('Error fetching message:', error);

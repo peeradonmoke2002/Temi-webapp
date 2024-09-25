@@ -16,12 +16,12 @@ app.use(cors());
 
 // RabbitMQ connection //
 const port = 3002;
-const RABBITMQ_URL = 'amqp://admin:123456@10.62.31.12:5672'; 
+const RABBITMQ_URL = 'amqp://admin:123456@127.0.0.1:5672'; 
 
 // PostgreSQL database connection details
 const pool = new Pool({
     user: 'admin',
-    host: '10.62.31.12',  
+    host: '127.0.0.1',  
     database: 'temi-db',
     password: '123456',
     port: 5432,  

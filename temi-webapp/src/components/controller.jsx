@@ -4,6 +4,13 @@ import wasd from '../assets/wasd.png';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
+import config from "../config/configureAPI";
+const currentUrl = window.location.href;
+const isDeploy = currentUrl.includes('localhost') ? 'development' : 'production';  
+const environment = process.env.NODE_ENV || isDeploy;
+const API = config[environment].API;
+
+
 const Controller = () => {
   const [controlEnabled, setControlEnabled] = useState(false);
 
@@ -35,7 +42,7 @@ const Controller = () => {
     }
 
     // Send the newCommand directly, not relying on state
-    axios.post('http://localhost:3002/send-command', { command: newCommand })
+    axios.post(`${API}/send-command`, { command: newCommand })
       .then(response => console.log('Command sent:', response.data))
       .catch(error => console.error('Error sending command:', error));
   };

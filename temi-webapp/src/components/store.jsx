@@ -10,6 +10,11 @@ import axios from 'axios';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import config from "../config/configureAPI";
+const currentUrl = window.location.href;
+const isDeploy = currentUrl.includes('localhost') ? 'development' : 'production';  
+const environment = process.env.NODE_ENV || isDeploy;
+const API = config[environment].API;
 
 const Store = () => {
   const dispatch = useDispatch();
@@ -42,9 +47,9 @@ const Store = () => {
     try {
       let url = '';
       if (type === 'product') {
-        url = `http://localhost:3002/api/productImage/${id}`;
+        url = `${API}/api/productImage/${id}`;
       } else if (type === 'qrcode') {
-        url = `http://localhost:3002/api/qrCodeImage/${id}`;
+        url = `${API}/api/qrCodeImage/${id}`;
       }
       
       const response = await axios.get(url, { responseType: 'arraybuffer' });
@@ -101,7 +106,7 @@ const Store = () => {
     dispatch(updateProduct(editedProduct));
   
     let newCommand = 'UPDATE';
-    axios.post('http://localhost:3002/update-store', { command: newCommand })
+    axios.post(`${API}/update-store`, { command: newCommand })
       .then(response => console.log('Command sent:', response.data))
       .catch(error => console.error('Error sending command:', error));
   
@@ -133,7 +138,7 @@ const handleSaveAdd = useCallback((newProduct) => {
         });
 
     let newCommand = 'UPDATE';
-    axios.post('http://localhost:3002/update-store', { command: newCommand })
+    axios.post(`${API}/update-store`, { command: newCommand })
         .then(response => console.log('Command sent:', response.data))
         .catch(error => console.error('Error sending command:', error));
 
