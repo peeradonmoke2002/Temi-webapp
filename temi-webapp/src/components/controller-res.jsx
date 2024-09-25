@@ -7,6 +7,13 @@ const isDeploy = currentUrl.includes('localhost') ? 'development' : 'production'
 const environment = process.env.NODE_ENV || isDeploy;
 const API = config[environment].API;
 
+
+import config from "../config/configureAPI";
+const currentUrl = window.location.href;
+const isDeploy = currentUrl.includes('localhost') ? 'development' : 'production';  
+const environment = process.env.NODE_ENV || isDeploy;
+const API = config[environment].API;
+
 const ControllerRes = () => {
   const [message, setMessage] = useState('');
 
