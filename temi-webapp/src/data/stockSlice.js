@@ -6,6 +6,9 @@ const currentUrl = window.location.href;
 const isDeploy = currentUrl.includes('localhost') ? 'development' : 'production';  
 const environment = process.env.NODE_ENV || isDeploy;
 const API = config[environment].API;
+console.log('environment:', environment);
+console.log('currentUrl:', currentUrl);
+console.log('API:', API);
 
 
 // Utility function to convert ArrayBuffer to Base64

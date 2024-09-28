@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 const Video = () => {
-  const websocketUrl = "ws://10.7.142.208:8765";
+  const websocketUrl = "ws://10.9.156.85:8765";
   const [connected, setConnected] = useState(false);
   const canvasRef = useRef(null); // Reference to update the canvas element with new frames
 
