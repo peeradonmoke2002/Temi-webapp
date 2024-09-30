@@ -51,7 +51,7 @@ const AddProductModal = ({ onSave, onClose }) => {
       <div className="relative p-4 w-full max-w-lg max-h-full bg-white rounded-lg shadow dark:bg-gray-700">
         {/* Modal header */}
         <div className="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Product</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Add New information</h3>
           <button onClick={onClose} className="text-gray-400 bg-transparent hover:bg-gray-200 rounded-lg w-8 h-8">
             <span>×</span>
           </button>
@@ -64,15 +64,15 @@ const AddProductModal = ({ onSave, onClose }) => {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            placeholder="Product Name"
+            placeholder="Information Name"
             className="w-full p-2 border rounded"
           />
           <input
             type="text"
-            name="price"
+            name="date"
             value={formData.price}
             onChange={handleInputChange}
-            placeholder="Price"
+            placeholder="Date"
             className="w-full p-2 border rounded"
           />
           <textarea
@@ -84,7 +84,7 @@ const AddProductModal = ({ onSave, onClose }) => {
           />
 
           {/* Product Image Upload */}
-          <label>Product Image</label>
+          <label>Image</label>
           <input
             type="file"
             name="productImage"
@@ -94,7 +94,7 @@ const AddProductModal = ({ onSave, onClose }) => {
           />
 
           {/* QR Code Image Upload */}
-          <label>QR Code Image</label>
+          <label>Image</label>
           <input
             type="file"
             name="qrCodeImage"

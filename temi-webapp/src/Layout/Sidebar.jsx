@@ -67,8 +67,8 @@ const SideBar = () => {
                 Dashboard
               </MenuItem>
 
-              <MenuItem icon={<StorefrontOutlinedIcon />} onClick={() => navigate("/store")}>
-                Store
+              <MenuItem icon={<StorefrontOutlinedIcon />} onClick={() => navigate("/prmanagement")}>
+                PR Mangement
               </MenuItem>
 
             </Menu>

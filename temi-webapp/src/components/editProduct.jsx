@@ -85,7 +85,7 @@ const EditProductModal = ({ product, onSave, onClose }) => {
           />
 
           {/* Product Image Upload */}
-          <label>Product Image</label>
+          <label>Image</label>
           <input
             type="file"
             name="productImage"
@@ -95,7 +95,7 @@ const EditProductModal = ({ product, onSave, onClose }) => {
           />
 
           {/* QR Code Image Upload */}
-          <label>QR Code Image</label>
+          <label>Image</label>
           <input
             type="file"
             name="qrCodeImage"

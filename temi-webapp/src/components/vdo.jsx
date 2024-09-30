@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 const Video = () => {
-  const websocketUrl = "ws://10.9.156.85:8765";
+  const websocketUrl = "ws://10.34.130.128:8765";
   const [connected, setConnected] = useState(false);
   const canvasRef = useRef(null); // Reference to update the canvas element with new frames
 
@@ -47,14 +47,13 @@ const Video = () => {
   }, [websocketUrl]);
 
   return (
-    <div className="video-stream">
+    <div className="video-stream flex flex-col items-center h-screen mt-4">
       <canvas
         ref={canvasRef}
         width="640"
         height="480"
-        style={{ border: 'none' }}
+        style={{ border: 'none', backgroundColor: connected ? 'transparent' : 'black', borderRadius: '10px' }}
       />
-      <div>{connected ? 'Connected' : 'Disconnected'}</div>
     </div>
   );
 };

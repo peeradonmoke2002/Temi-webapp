@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDataStock, addProduct, updateProduct, deleteProduct, selectData } from '../data/stockSlice';
+import { fetchDataStock, addProduct, updateProduct, 
+          deleteProduct, selectData,
+        updateProductImage, updateProductQrCode } from '../data/stockSlice';
 import { DataGrid } from '@mui/x-data-grid';
 import TailwindModal from './Modal';
 import AddProductModal from './addProduct';
@@ -74,6 +76,11 @@ const Store = () => {
       const updatedData = localData.filter(product => !selectedRows.includes(product.id));
       setLocalData(updatedData);
       selectedRows.forEach(rowId => dispatch(deleteProduct(rowId)));
+
+      let newCommand = 'UPDATE';
+      axios.post(`${API}/update-store`, { command: newCommand })
+        .then(response => console.log('Command sent:', response.data))
+        .catch(error => console.error('Error sending command:', error));
     }
   }, [selectedRows, localData, dispatch]);
 
@@ -90,28 +97,38 @@ const Store = () => {
     setShowAddModal(true);
   }, []);
 
-  const handleSaveEdit = (editedProduct) => {
-    const { detail, name, price, product_image, qr_code_image } = editedProduct;
+  // Function to handle saving edited product
+const handleSaveEdit = (editedProduct) => {
+  console.log('Edited Product:', editedProduct); // Check if `id` is present
+  const { detail, name, price, product_image, qr_code_image } = editedProduct;
 
-    // if (!detail || !name || !price || !product_image || !qr_code_image) {
-    //     console.warn('One or more required fields are empty. Nothing to add.');
-    //     setShowEditModal(false);
-    //     return;
-    // }
+  // Ensure `id` is a valid number
+  const parsedId = parseInt(editedProduct.id, 10);
+  if (isNaN(parsedId)) {
+    console.error('Invalid product ID:', editedProduct.id); // Log the error
+    return;
+  }
 
-    const updatedData = localData.map(product =>
-      product.id === editedProduct.id ? editedProduct : product
-    );
-    setLocalData(updatedData);
-    dispatch(updateProduct(editedProduct));
-  
-    let newCommand = 'UPDATE';
-    axios.post(`${API}/update-store`, { command: newCommand })
-      .then(response => console.log('Command sent:', response.data))
-      .catch(error => console.error('Error sending command:', error));
-  
-    setShowEditModal(false);
-  };
+  // Update local data
+  const updatedData = localData.map(product =>
+    product.id === parsedId ? editedProduct : product
+  );
+  setLocalData(updatedData);
+
+  // Dispatch actions to update images
+  if (parsedId) {
+    dispatch(updateProductImage({ id: parsedId, updatedProduct: { product_image } }));
+    dispatch(updateProductQrCode({ id: parsedId, updatedProduct: { qr_code_image } }));
+  }
+
+  // Send update command
+  let newCommand = 'UPDATE';
+  axios.post(`${API}/update-store`, { command: newCommand })
+    .then(response => console.log('Command sent:', response.data))
+    .catch(error => console.error('Error sending command:', error));
+
+  setShowEditModal(false);
+};
 
 const handleSaveAdd = useCallback((newProduct) => {
     const { detail, name, price, product_image, qr_code_image } = newProduct;
@@ -151,8 +168,8 @@ const handleSaveAdd = useCallback((newProduct) => {
 
   const columns = [
     // { field: 'id', headerName: 'ID', width: 150 },
-    { field: 'name', headerName: 'Name', width: 250 },
-    { field: 'price', headerName: 'Price', width: 200 },
+    { field: 'name', headerName: 'Name', width: 280 },
+    { field: 'price', headerName: 'Date', width: 120 },
     {
       field: 'image',
       headerName: 'Image',
@@ -174,7 +191,7 @@ const handleSaveAdd = useCallback((newProduct) => {
     },
     {
       field: 'qrcode',
-      headerName: 'QR Code',
+      headerName: 'Image',
       width: 200,
       renderCell: (params) => {
         const id = params.row.id;
@@ -186,7 +203,7 @@ const handleSaveAdd = useCallback((newProduct) => {
             onClick={() => handlePreviewClick(id, 'qrcode')}
             disabled={loadingButtons[id + 'qrcode']}
           >
-            Preview QR Code
+            Preview Image
           </button>
         );
       }
@@ -223,9 +240,9 @@ const handleSaveAdd = useCallback((newProduct) => {
   return (
     <div>
       <div className="flex flex-col justify-center items-center w-full py-4">
-        <h1 className="text-4xl font-bold text-gray-800">Store</h1>
-        <h2 className="text-xl text-gray-600 mt-2">Manage Your Temi Store</h2>
-        <hr className="my-4 border-t-2 border-gray-300 w-full" />
+        <h1 className="text-4xl font-bold text-gray-800">Public Relations Management</h1>
+        <h2 className="text-xl text-gray-600 mt-2">Manage Your Temi PR</h2>
+        <hr className="my-1 border-t-2 border-gray-300 w-full" />
     </div>
       {/* Action Buttons */}
       <div className="flex justify-start space-x-4 mb-4">
@@ -233,7 +250,7 @@ const handleSaveAdd = useCallback((newProduct) => {
           className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"
           onClick={handleAdd}
         >
-          <AddIcon className="mr-2" /> Add Product
+          <AddIcon className="mr-2" /> Add
         </button>
         <button
           className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-full inline-flex items-center ${
@@ -242,7 +259,7 @@ const handleSaveAdd = useCallback((newProduct) => {
           onClick={handleEdit}
           disabled={selectedRows.length !== 1}
         >
-          <EditIcon className="mr-2" /> Edit Product
+          <EditIcon className="mr-2" /> Edit
         </button>
         <button
           className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full inline-flex items-center ${
@@ -251,7 +268,7 @@ const handleSaveAdd = useCallback((newProduct) => {
           onClick={handleDelete}
           disabled={selectedRows.length === 0}
         >
-          <DeleteIcon className="mr-2" /> Delete Product
+          <DeleteIcon className="mr-2" /> Delete
         </button>
       </div>
 

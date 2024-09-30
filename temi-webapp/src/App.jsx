@@ -22,7 +22,7 @@ const App = () => {
             <Box m="20px">
               <Routes>
                 <Route path="/" element={<HomePage/> }/>
-                <Route path="/store" element={<Store />} />
+                <Route path="/prmanagement" element={<Store />} />
               </Routes>
             </Box>
           </div>

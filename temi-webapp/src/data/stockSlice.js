@@ -88,6 +88,36 @@ export const updateProduct = createAsyncThunk(
   }
 );
 
+// Action to update product image
+export const updateProductImage = createAsyncThunk(
+  'stock/updateProductImage',
+  async ({ id, updatedProduct }, { rejectWithValue }) => {
+    console.log('Updating product image with ID:', id, 'and data:', updatedProduct); // Debug log
+    try {
+      const response = await axios.put(`${API}/api/products/updateProductImage/${id}`, updatedProduct);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message || 'Connection error');
+    }
+  }
+);
+
+// Action to update QR code image
+export const updateProductQrCode = createAsyncThunk(
+  'stock/updateProductQrCode',
+  async ({ id, updatedProduct }, { rejectWithValue }) => {
+    console.log('Updating QR code image with ID:', id, 'and data:', updatedProduct); // Debug log
+    try {
+      const response = await axios.put(`${API}/api/products/updateQrCodeImage/${id}`, updatedProduct);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message || 'Connection error');
+    }
+  }
+);
+
+
+
 // Delete product
 export const deleteProduct = createAsyncThunk(
   'stock/deleteProduct',
@@ -186,6 +216,38 @@ const stockSlice = createSlice({
       .addCase(updateProduct.rejected, (state, action) => {
         state.loadingData = false;
         state.error = action.payload || 'Failed to update product';
+      })
+      // update product image
+      .addCase(updateProductImage.pending, (state) => {
+        state.loadingData = true;
+        state.error = null;
+      })
+      .addCase(updateProductImage.fulfilled, (state, action) => {
+        state.loadingData = false;
+        const index = state.data.findIndex((product) => product.id === action.payload.id);
+        if (index !== -1) {
+          state.data[index] = action.payload; // Update the product in the data array
+        }
+      })
+      .addCase(updateProductImage.rejected, (state, action) => {
+        state.loadingData = false;
+        state.error = action.payload || 'Failed to update product image';
+      })
+      // update product qrcode
+      .addCase(updateProductQrCode.pending, (state) => {
+        state.loadingData = true;
+        state.error = null;
+      })
+      .addCase(updateProductQrCode.fulfilled, (state, action) => {
+        state.loadingData = false;
+        const index = state.data.findIndex((product) => product.id === action.payload.id);
+        if (index !== -1) {
+          state.data[index] = action.payload; // Update the product in the data array
+        }
+      })
+      .addCase(updateProductQrCode.rejected, (state, action) => {
+        state.loadingData = false;
+        state.error = action.payload || 'Failed to update product qrcode';
       })
       // Delete product
       .addCase(deleteProduct.pending, (state) => {

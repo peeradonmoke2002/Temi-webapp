@@ -47,6 +47,19 @@ const Controller = () => {
       .catch(error => console.error('Error sending command:', error));
   };
 
+  const handelButtonHeadRobotUp = () => {
+    axios.post(`${API}/send-command-head`, { command: 'HEAD_UP' })
+      .then(response => console.log('Command sent:', response.data))
+      .catch(error => console.error('Error sending command:', error));
+  }
+
+  const handelButtonHeadRobotDown = () => {
+    axios.post(`${API}/send-command-head`, { command: 'HEAD_DOWN' })
+      .then(response => console.log('Command sent:', response.data))
+      .catch(error => console.error('Error sending command:', error));
+  }
+
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -55,12 +68,8 @@ const Controller = () => {
   }, [controlEnabled]); // Add controlEnabled to dependencies
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-gray-100 mt-4">
+    <div className="flex flex-col items-center justify-center p-4 bg-gray-100 mt-1">
       <div>
-        <h1 className="flex justify-center items-center text-4xl">TEMI APP</h1>
-        <p className="flex justify-center items-center text-1xl">
-          temi-webapp is a web application that allows you to control a temi robot.
-        </p>
         <div className="flex items-center justify-center space-x-6">
             <div>
               <h2 className="text-xl">Controller</h2>
@@ -79,6 +88,10 @@ const Controller = () => {
             </div>
             <div className="ml-8">
               <img src={wasd} alt="WASD" className="w-28 h-auto" />
+            </div>
+            <div className="flex flex-col space-y-2 mt-4">
+              <button onClick={handelButtonHeadRobotUp} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Head Up</button>
+              <button onClick={handelButtonHeadRobotDown} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Head Down</button>
             </div>
           </div>
         </div>

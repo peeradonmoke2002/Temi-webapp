@@ -62,6 +62,7 @@ const connectToRabbitMQ = () => {
             channel = ch;
             const controlQueuequeue = 'robot_control_queue';
             const storeupdateQueue = 'store_update_queue';
+            const controlQueueHead = 'robot_control_head_queue';
             console.log(`Connected to RabbitMQ and created channel for queue: ${controlQueuequeue} and ${storeupdateQueue}`);
             channel.assertQueue(controlQueuequeue, {
                 durable: false,
@@ -70,6 +71,12 @@ const connectToRabbitMQ = () => {
                 }
             });
             channel.assertQueue(storeupdateQueue, {
+                durable: false,
+                arguments: {
+                    'x-message-ttl': 300000  // TTL set to 300,000 ms (5 minutes)
+                }
+            });
+            channel.assertQueue(controlQueueHead, {
                 durable: false,
                 arguments: {
                     'x-message-ttl': 300000  // TTL set to 300,000 ms (5 minutes)
@@ -118,6 +125,20 @@ app.post('/send-command', (req, res) => {
         console.log(`Sent command: ${command}`);
         res.status(200).send('Command sent to RabbitMQ');
     } else {
+        res.status(500).send('Channel is not available');
+    }
+});
+
+app.post('/send-command-head', (req, res) => {
+    const command = req.body.command;
+    const queue = 'robot_control_head_queue';
+
+    if (channel) {
+        channel.sendToQueue(queue, Buffer.from(command));
+        console.log(`Sent command: ${command}`);
+        res.status(200).send('Command sent to RabbitMQ');
+    }
+    else {
         res.status(500).send('Channel is not available');
     }
 });
@@ -174,6 +195,20 @@ app.get('/api/products/data', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch products' });
+    }
+});
+
+app.get('/api/products/detail/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const client = await pool.connect();
+        const result = await client.query('SELECT detail FROM store WHERE id = $1', [id]);
+        client.release();
+        res.json(result.rows[0]);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch product detail' });
     }
 });
 
@@ -300,11 +335,21 @@ app.put('/api/products/updateProductImage/:id', async (req, res) => {
     const { id } = req.params;
     const { product_image } = req.body;
 
+    // Debug log to verify ID and request body
+    console.log('Received ID for product image update:', id);
+    console.log('Request Body:', req.body);
+
+    // Ensure ID is a valid integer
+    const parsedId = parseInt(id, 10);
+    if (isNaN(parsedId)) {
+        return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
     try {
         const client = await pool.connect();
 
         // Retrieve the current product data to retain unchanged fields
-        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [id]);
+        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [parsedId]);
 
         if (currentProductResult.rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
@@ -318,7 +363,7 @@ app.put('/api/products/updateProductImage/:id', async (req, res) => {
         // Update only the product image in the database
         const result = await client.query(
             'UPDATE store SET product_image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-            [updatedProductImage, id]
+            [updatedProductImage, parsedId]
         );
 
         client.release();
@@ -329,17 +374,26 @@ app.put('/api/products/updateProductImage/:id', async (req, res) => {
     }
 });
 
-
 // Endpoint to update only the QR code image
 app.put('/api/products/updateQrCodeImage/:id', async (req, res) => {
     const { id } = req.params;
     const { qr_code_image } = req.body;
 
+    // Debug log to verify ID and request body
+    console.log('Received ID for QR code image update:', id);
+    console.log('Request Body:', req.body);
+
+    // Ensure ID is a valid integer
+    const parsedId = parseInt(id, 10);
+    if (isNaN(parsedId)) {
+        return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
     try {
         const client = await pool.connect();
 
         // Retrieve the current product data to retain unchanged fields
-        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [id]);
+        const currentProductResult = await client.query('SELECT * FROM store WHERE id = $1', [parsedId]);
 
         if (currentProductResult.rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
@@ -353,7 +407,7 @@ app.put('/api/products/updateQrCodeImage/:id', async (req, res) => {
         // Update only the QR code image in the database
         const result = await client.query(
             'UPDATE store SET qr_code_image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-            [updatedQRCodeImage, id]
+            [updatedQRCodeImage, parsedId]
         );
 
         client.release();
